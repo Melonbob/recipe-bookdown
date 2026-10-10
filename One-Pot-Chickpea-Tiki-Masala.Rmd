@@ -13,7 +13,7 @@ _From Jonathan Diel_
 \ingredient[1]{tsp}{garam masala}
 \ingredient[1]{tsp}{ground cumin}
 \ingredient[1]{tsp}{curry powder}
-\ingredient[fr 12]{tsp}{smoked paprika}
+\ingredient[r12]{tsp}{smoked paprika}
 \ingredient[3]{Tbps}{tomato paste}
 \ingredient[2]{}{(15-oz) cans diced fire roasted tomatoes}
 \ingredient[1]{c}{vegetable broth}

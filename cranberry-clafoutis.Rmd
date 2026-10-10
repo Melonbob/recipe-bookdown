@@ -10,7 +10,7 @@ _from Victoria Getis_
 \ingredient[Pinch]{}{salt}
 \freeform Beat eggs well, then add remaining sugar. Beat until smooth. Add flour, and beat again until smooth. Add the half-and-half or milk and salt, and whisk until smooth.
 \ingredient[2]{cups}{cranberries}
-\ingredient{Scant cup}{}{walnuts}
+\ingredient[Scant]{cup}{walnuts}
 
 \freeform Coarsely chop cranberries and walnuts. If using a food processor, do not overprocess -- just pulse until chopped. (It's very fast.) Put cranberry mixture in pie plate, and pour batter over it.
 \ingredient[]{}{Confectioners' sugar}

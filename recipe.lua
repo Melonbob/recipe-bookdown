@@ -199,35 +199,46 @@ local function convert_recipe(text)
   local yield, time = args[2] or "", args[3] or ""
   local body = rest:sub(pos):gsub("\\end[ \t\r\n]*{recipe}[ \t\r\n]*$", "")
 
-  -- walk the body line by line, building rows/notes/rules
+  -- Walk the body line by line, mirroring cuisine.sty's state machine so the
+  -- web steps are numbered exactly like the PDF:
+  --   * ingredients pile up in a box; text after them goes in a "method" box
+  --   * the pair is flushed as one numbered step at the next \ingredient,
+  --     \newstep/\newpage or \freeform, or at \end{recipe}
+  --   * \newstep with an empty method still flushes if the recipe has had any
+  --     ingredient so far (cuisine prints an empty numbered step then)
+  --   * \freeform text is printed unnumbered and leaves the ingredient box alone
   local items = {}
-  local cur = { ings = {}, texts = {} }
-  local step_counter, pending = 0, nil
-  local para, para_kind
+  local ing_box, method, freeform = {}, {}, false
+  local ingr_count, step_n = 0, 0
+  local para
 
-  local function touch()
-    if pending and not cur.step then cur.step = pending; pending = nil end
-  end
-  local function close_row()
-    if #cur.ings > 0 or #cur.texts > 0 then
-      items[#items + 1] = { t = "row", row = cur }
+  local function display()
+    if freeform then
+      for _, m in ipairs(method) do
+        if m.kind == "hr" then items[#items + 1] = { t = "hr" }
+        else items[#items + 1] = { t = "note", text = m.text } end
+      end
+    else
+      step_n = step_n + 1
+      local texts = {}
+      for _, m in ipairs(method) do
+        if m.kind == "text" then texts[#texts + 1] = m.text end
+      end
+      items[#items + 1] = { t = "row", row = { step = step_n, ings = ing_box, texts = texts } }
+      ing_box = {}
     end
-    local keep = cur.step and (#cur.ings == 0 and #cur.texts == 0) and cur.step or nil
-    cur = { ings = {}, texts = {}, step = keep }
+    method = {}
   end
   local function flush_para()
-    if para and trim(para) ~= "" then
-      if para_kind == "note" then
-        close_row()
-        items[#items + 1] = { t = "note", text = para }
-      else
-        touch()
-        cur.texts[#cur.texts + 1] = para
-      end
-    end
-    para, para_kind = nil, nil
+    if para and trim(para) ~= "" then method[#method + 1] = { kind = "text", text = para } end
+    para = nil
   end
-  local function start_para(text, kind) para, para_kind = text, kind end
+  -- \newstep, \newpage and \freeform: finish the current step, then restart
+  local function end_method()
+    flush_para()
+    if #method > 0 or ingr_count > 0 then display() end
+    method = {}
+  end
 
   for line in (body .. "\n"):gmatch("(.-)\n") do
     local t = trim(line)
@@ -235,35 +246,32 @@ local function convert_recipe(text)
       flush_para()
     elseif t:match("^\\ingredient") then
       flush_para()
-      if #cur.texts > 0 then close_row() end
-      touch()
-      cur.ings[#cur.ings + 1] = parse_ingredient(t:sub(12))
+      if #method > 0 then display() end
+      ing_box[#ing_box + 1] = parse_ingredient(t:sub(12))
+      ingr_count = ingr_count + 1
+      freeform, method = false, {}
     elseif t:match("^\\freeform") then
-      flush_para()
+      end_method()
+      freeform = true
       local r = trim(t:sub(10))
-      if r:match("^\\rule") then
-        close_row(); items[#items + 1] = { t = "hr" }
-      elseif r ~= "" then
-        start_para(r, "note")
-      end
-    elseif t:match("^\\newstep") then
-      flush_para(); close_row()
-      step_counter = step_counter + 1
-      pending = step_counter
-      cur.step = nil
+      if r:match("^\\rule") then method[#method + 1] = { kind = "hr" }
+      elseif r ~= "" then para = r end
+    elseif t:match("^\\newstep") or t:match("^\\newpage") then
+      end_method()
+      freeform = false
       local r = trim(t:sub(9))
-      if r ~= "" then start_para(r, "text") end
+      if r ~= "" then para = r end
     elseif t:match("^\\rule") then
-      flush_para(); close_row(); items[#items + 1] = { t = "hr" }
-    elseif t:match("^\\newpage") then
-      -- no meaning on the web
+      flush_para()
+      method[#method + 1] = { kind = "hr" }
     elseif t:match("^\\par%f[%A]") then
       flush_para()
     else
-      if para then para = para .. "\n" .. t else start_para(t, "text") end
+      if para then para = para .. "\n" .. t else para = t end
     end
   end
-  flush_para(); close_row()
+  flush_para()
+  if #method > 0 then display() end
 
   -- render
   local out = pandoc.List()

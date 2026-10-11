@@ -7,13 +7,13 @@ _from Rohit Ramanathan, Adapted from Rev Soup in Charlottesville, VA_
 \ingredient[2]{}{Medium Jalapenos, seeds removed if desired, and diced}
 \ingredient[2]{inches}{ginger, minced}
 \ingredient[4]{cloves}{garlic, minced}
-\ingredient[2]{bbsp}{Curry Powder, plus more to taste}
+\ingredient[2]{tbsp}{Curry Powder, plus more to taste}
 \ingredient[14]{oz}{canned diced tomatoes, do not drain}
 \ingredient[14]{oz}{canned crushed tomatoes}
-\ingredient[1][can]{coconut milk}
+\ingredient[1]{can}{coconut milk}
 \ingredient[1]{cup}{smooth peanut butter, plus more to taste}
 \ingredient[1]{package}{firm tofu, drained and pressed to remove moisture, and cut into cubes.}
-\ingredient[to taste]{salt}
+\ingredient[to taste]{}{salt}
 
 1. In a large pot or dutch oven, sautee the onions and carrots together in about 1 tbsp oil until they are soft. Season with salt to taste and add curry powder.
 2. Using a small blender or mortal and pestle, combine the jalapenos, ginger, and garlic together with a pinch of salt until a coarse paste forms.

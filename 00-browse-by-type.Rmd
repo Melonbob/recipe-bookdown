@@ -1,0 +1,6 @@
+```{r, echo=FALSE, results='asis'}
+# Web book only: the PDF has its own contents/index from the cuisine package.
+if (knitr::is_html_output()) {
+  cat("# Browse by Type {-#browse-by-type}\n\n::: {.recipe-index .by-type}\n:::\n")
+}
+```
